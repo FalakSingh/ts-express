@@ -1,0 +1,37 @@
+{
+  "compilerOptions": {
+    "target": "ES2019",
+    "module": "CommonJS",                            
+    "esModuleInterop": true,     
+    "allowJs": true,                     
+    "forceConsistentCasingInFileNames": true,   
+    "experimentalDecorators": true,      
+    "emitDecoratorMetadata": true,
+    "skipLibCheck": true,                             
+    "strict": false,                                  
+    "outDir": "dist",                                  
+    "removeComments": true,                            
+    "moduleResolution": "node",                         
+    "resolveJsonModule": true,   
+    "inlineSources": true,                           
+    "sourceMap": true, 
+    "baseUrl": ".",
+    "paths": {
+      "@middlewares": ["src/api/middlewares/index"],
+      "@routes": ["src/api/routes/index"],
+      "@controllers": ["src/api/controllers/index"],
+      "@services": ["src/api/services/index"],
+      "@models": ["src/api/models/index"],
+      "@helpers": ["src/api/helpers/index"],
+      "@validations": ["src/api/validations/index"],
+      "@utils": ["src/api/utils/index"],
+      "@public/*": ["public/*"],
+      "@env": ["src/config/env"],
+      "@logger":["src/config/logger"],
+      "types/*": ["src/api/types/*"],
+      "@constants": ["src/api/constants/api.constants"]
+    }   
+  },
+  "include": ["./node_modules/@types", "src/**/*.ts", "src/**/*.d.ts"],                             
+  "exclude": ["node_modules", "dist"]                     
+}
