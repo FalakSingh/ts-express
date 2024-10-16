@@ -1,57 +1,96 @@
-import Joi from "joi";
-import validateRequest from "./validate";
+import Joi from 'joi';
+import validateRequest from './validate';
 
+// Common messages
+const stringMessages = (field: string) => ({
+  'string.base': `${field} must be a string`,
+  'string.empty': `${field} is required`,
+  'any.required': `${field} is required`,
+});
+
+// Schema for user details (first name, last name)
+const nameSchema = (field: string) =>
+  Joi.string()
+    .trim()
+    .min(3)
+    .max(50)
+    .required()
+    .messages({
+      ...stringMessages(field),
+      'string.min': `${field} should have a minimum length of {#limit}`,
+      'string.max': `${field} should have a maximum length of {#limit}`,
+    });
+
+// Email validation
+const emailSchema = Joi.string()
+  .lowercase()
+  .trim()
+  .email()
+  .required()
+  .messages({
+    ...stringMessages('Email'),
+    'string.email': 'Email must be a valid email',
+  });
+
+// Password validation
+const passwordSchema = Joi.string()
+  .trim()
+  .min(8)
+  .required()
+  .messages({
+    ...stringMessages('Password'),
+    'string.min': 'Password should have a minimum length of {#limit}',
+  });
+
+// Basic schemas
 const createUserSchema = Joi.object({
-  fullName: Joi.string().trim().min(3).max(50).required().messages({
-    "string.base": "Full name must be a string",
-    "string.empty": "Full name is required",
-    "string.min": "Full name should have a minimum length of {#limit}",
-    "string.max": "Full name should have a maximum length of {#limit}",
-    "any.required": "Full name is required",
-  }),
-  email: Joi.string().lowercase().trim().email().required().messages({
-    "string.base": "Email must be a string",
-    "string.email": "Email must be a valid email",
-    "string.empty": "Email is required",
-    "any.required": "Email is required",
-  }),
-  password: Joi.string().trim().min(8).required().messages({
-    "string.base": "Password must be a string",
-    "string.empty": "Password is required",
-    "string.min": "Password should have a minimum length of {#limit}",
-    "any.required": "Password is required",
-  }),
+  firstName: nameSchema('First name'),
+  lastName: nameSchema('Last name'),
+  email: emailSchema,
+  password: passwordSchema,
   image: Joi.string().required().messages({
-    "string.base": "Password must be a string",
-    "any.required": "Image is required",
+    'any.required': 'Image is required',
+  }),
+  emiratesId: Joi.string().required().messages({
+    'any.required': 'Emirates Id is required',
+  }),
+  dob: Joi.string().required().messages({ 'any.required': 'DOB is required' }),
+  countryCode: Joi.string().required().messages({ 'any.required': 'Country code is required' }),
+  phoneNumber: Joi.string().min(7).max(10).required().messages({
+    'string.min': 'Phone Number should have a minimum length of {#limit}',
+    'string.max': 'Phone Number should have a maximum length of {#limit}',
+    'any.required': 'Phone Number is required',
   }),
 });
 
 const loginUserSchema = Joi.object({
-  email: Joi.string().trim().email().required().messages({
-    "string.base": "Email must be a string",
-    "string.email": "Email must be a valid email",
-    "string.empty": "Email is required",
-    "any.required": "Email is required",
-  }),
-  password: Joi.string().trim().min(8).required().messages({
-    "string.base": "Password must be a string",
-    "string.empty": "Password is required",
-    "string.min": "Password should have a minimum length of {#limit}",
-    "any.required": "Password is required",
-  }),
+  email: emailSchema,
+  password: passwordSchema,
 });
+
 const forgotPasswordSchema = Joi.object({
-  email: Joi.string().trim().email().required().messages({
-    "string.base": "Email must be a string",
-    "string.email": "Email must be a valid email",
-    "string.empty": "Email is required",
-    "any.required": "Email is required",
+  email: emailSchema,
+});
+
+const verifyOtpSchema = forgotPasswordSchema.keys({
+  otp: Joi.string().trim().required().messages({
+    'any.required': 'OTP is required',
   }),
 });
 
+const resetPasswordSchema = Joi.object({
+  resetToken: Joi.string().trim().min(8).required().messages({
+    'string.min': 'Reset Token should have a minimum length of {#limit}',
+    'any.required': 'Reset Token is required',
+  }),
+  password: passwordSchema,
+});
+
+// Validate functions
+const forgotPassword = validateRequest(forgotPasswordSchema);
 const createUser = validateRequest(createUserSchema);
 const userLogin = validateRequest(loginUserSchema);
-const forgotPassword = validateRequest(forgotPasswordSchema);
+const verifyOtp = validateRequest(verifyOtpSchema);
+const resetPassword = validateRequest(resetPasswordSchema);
 
-export { createUser, userLogin, forgotPassword };
+export { forgotPassword, createUser, userLogin, verifyOtp, resetPassword };

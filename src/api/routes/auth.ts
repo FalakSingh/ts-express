@@ -15,36 +15,44 @@ const authRoutes = [
     middleware: [upload, filehandler, AuthValidation.createUser],
   },
   {
-    path: "/login",
-    method: "post",
+    path: '/login',
+    method: 'post',
     handler: AuthController.login,
     middleware: [AuthValidation.userLogin],
   },
   {
-    path: "/forgot-password",
-    method: "post",
+    path: '/forgot-password',
+    method: 'post',
     handler: AuthController.forgotPassword,
     middleware: [AuthValidation.forgotPassword],
   },
   {
-    path: "/create-super-admin",
-    method: "get",
+    path: '/verify-otp',
+    method: 'post',
+    handler: AuthController.verifyOtp,
+    middleware: [AuthValidation.verifyOtp],
+  },
+  {
+    path: '/reset-password',
+    method: 'put',
+    handler: AuthController.resetPassword,
+    middleware: [AuthValidation.resetPassword],
+  },
+  {
+    path: '/create-super-admin',
+    method: 'get',
     handler: AuthController.createSuperAdmin,
   },
   {
-    path: "/admin-login",
-    method: "post",
+    path: '/admin-login',
+    method: 'post',
     handler: AuthController.adminLogin,
     middleware: [AuthValidation.userLogin],
   },
 ];
 
 authRoutes.forEach(({ path, method, handler, middleware = [defaultMiddleware] }) =>
-  (authRouter as any)[method](
-    path,
-    middleware,
-    catchAsync(handler as ExpressHandler)
-  )
+  (authRouter as any)[method](path, middleware, catchAsync(handler as ExpressHandler))
 );
 
 export { authRouter };

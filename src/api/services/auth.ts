@@ -1,12 +1,12 @@
-import { Admin, IAdmin, IUser, User } from "@models";
-import { UserService } from ".";
-import { HttpStatus, Messages } from "@constants";
-import { ErrorRes } from "@helpers";
-import Env from "@env";
+import { Admin, IAdmin, IUser, User } from '@models';
+import { UserService } from '.';
+import { HttpStatus, Messages } from '@constants';
+import { ErrorRes } from '@helpers';
+import Env from '@env';
+import { jwt } from '@utils';
+import { JwtPayload } from 'jsonwebtoken';
 
-const register = async (data: Partial<IUser>) => {
-  return await UserService.create(data);
-};
+// User Auth Services
 
 const login = async (data: { email: string; password: string }) => {
   const email = data.email.toLowerCase();
@@ -16,12 +16,12 @@ const login = async (data: { email: string; password: string }) => {
 
   if (!user) throw new ErrorRes(HttpStatus.badRequest, Messages.invalidEmail);
 
-  if (user.isDeactivated)
-    throw new ErrorRes(HttpStatus.badRequest, Messages.isDeactivated);
+  if (!user.isEmailVerified) throw new ErrorRes(HttpStatus.badRequest, Messages.otpNotVerified);
+
+  if (user.isDeactivated) throw new ErrorRes(HttpStatus.badRequest, Messages.isDeactivated);
 
   const passCheck = await user.checkPass(password);
-  if (!passCheck)
-    throw new ErrorRes(HttpStatus.badRequest, Messages.invalidCredentials);
+  if (!passCheck) throw new ErrorRes(HttpStatus.badRequest, Messages.invalidCredentials);
 
   const token = user.getAccessToken();
 
@@ -31,10 +31,39 @@ const login = async (data: { email: string; password: string }) => {
 
   return userObj;
 };
+const forgotPassword = async ({ email }: { email: string }) => {
+  const user = await User.findByEmail(email.toLowerCase());
 
+  if (!user) throw new ErrorRes(404, "User with this email doesn't exist");
+
+  user.getOtp();
+
+  await user.save();
+  return { otp: user.otp };
+};
+
+const verifyOtp = async (data: { email: string; otp: string }): Promise<IUser> => {
+  const user = await User.findByEmail(data.email.toLowerCase());
+
+  if (!user) throw new ErrorRes(400, 'Something went wrong, Please try again.');
+
+  const isVerified = await user.verifyOtp(data.otp);
+
+  if (!isVerified) throw new ErrorRes(400, 'Incorrect OTP');
+  return user;
+};
+
+const resetPassword = async (data: { resetToken: string; password: string }): Promise<void> => {
+  const decoded = jwt.verify(data.resetToken, Env.RESET_TOKEN_SECRET);
+  const { id } = decoded as JwtPayload;
+  const user = await User.findById(id);
+  user.password = data.password.trim();
+  await user.save();
+};
+
+// Admin Auth Services
 const createSuperAdmin = async () => {
-  if (await Admin.superAdminExists())
-    throw new ErrorRes(HttpStatus.badRequest, Messages.adminExists);
+  if (await Admin.superAdminExists()) throw new ErrorRes(HttpStatus.badRequest, Messages.adminExists);
 
   await Admin.create({
     email: Env.ADMIN_EMAIL,
@@ -46,15 +75,13 @@ const adminLogin = async (data: { email: string; password: string }) => {
   const email = data.email.toLowerCase();
   const password = data.password;
 
-  const admin = await Admin.findOne({ email }).select("+password");
+  const admin = await Admin.findOne({ email }).select('+password');
 
-  if (!admin)
-    throw new ErrorRes(HttpStatus.badRequest, Messages.adminDoesntExists);
+  if (!admin) throw new ErrorRes(HttpStatus.badRequest, Messages.adminDoesntExists);
 
   const passcheck = await admin.checkPass(password);
 
-  if (!passcheck)
-    throw new ErrorRes(HttpStatus.badRequest, Messages.invalidCredentials);
+  if (!passcheck) throw new ErrorRes(HttpStatus.badRequest, Messages.invalidCredentials);
 
   const token = admin.getJwt();
 
@@ -66,13 +93,4 @@ const adminLogin = async (data: { email: string; password: string }) => {
   return adminObj;
 };
 
-const forgotPassword = async (data: { email: string }) => {
-  const user = await User.findByEmail(data.email.toLowerCase());
-  if (!user) throw new ErrorRes(400, Messages.invalidEmail);
-
-  const otp = await user.getOtp();
-
-  return otp;
-};
-
-export { register, login, createSuperAdmin, adminLogin, forgotPassword };
+export { login, createSuperAdmin, adminLogin, forgotPassword, verifyOtp, resetPassword };

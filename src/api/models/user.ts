@@ -2,6 +2,7 @@ import { Model, model, Schema, Document } from 'mongoose';
 import bcrypt from 'bcryptjs';
 import Env from '@env';
 import { generateOtp, jwt } from '@utils';
+import { ErrorRes } from '@helpers';
 
 export interface IUser extends Document, IUserMethods {
   fullName: string;
@@ -12,7 +13,7 @@ export interface IUser extends Document, IUserMethods {
   phoneNumber: string;
   image: string;
   otp: string;
-  otpExpires: Date;
+  otpExpiresAt: Date;
   isDeleted: boolean;
   isDeactivated: boolean;
   lastLogin: Date;
@@ -24,6 +25,7 @@ interface IUserMethods {
   getAccessToken(): string;
   getResetToken(): string;
   getOtp(): Promise<string>;
+  verifyOtp(givenOtp: string): Promise<boolean>;
 }
 
 interface IUserModel extends Model<IUser, {}, IUserMethods> {
@@ -41,7 +43,7 @@ const userSchema = new Schema<IUser, IUserModel, IUserMethods>(
     phoneNumber: String,
     image: String,
     otp: { type: String, select: false },
-    otpExpires: Date,
+    otpExpiresAt: Date,
     lastLogin: Date,
     isDeleted: { type: Boolean, default: false },
     isDeactivated: { type: Boolean, default: false },
@@ -96,9 +98,18 @@ userSchema.methods = {
   getOtp: async function (): Promise<string> {
     const otp = generateOtp(4);
     this.otp = otp;
-    this.otpExpires = new Date(Date.now() + 10 * 60 * 1000);
+    this.otpExpiresAt = new Date(Date.now() + 10 * 60 * 1000);
     await this.save();
     return otp;
+  },
+
+  verifyOtp: async function (givenOtp: string): Promise<boolean> {
+    if (new Date().getTime() - new Date(this.otpExpiresAt).getTime() > 1000 * 60 * 10)
+      throw new ErrorRes(410, 'OTP Expired');
+    const isOtpCorrect = this.otp === givenOtp;
+    if (isOtpCorrect) this.otp = undefined;
+    await this.save();
+    return isOtpCorrect;
   },
 };
 
