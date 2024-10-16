@@ -1,13 +1,15 @@
-export const HttpStatus: Record<string, number> = {
+import { HttpStatusTypes, MessagesTypes } from 'types/constants';
+
+export const HttpStatus: HttpStatusTypes = {
   serverError: 500,
   unauthorized: 401,
   badRequest: 400,
-  notFound: 404,
   forbidden: 403,
+  notFound: 404,
   ok: 200,
 };
 
-export const Messages: Record<string, string> = {
+export const Messages: MessagesTypes = {
   serverError: 'Internal Server Error',
   badRequest: 'Bad request',
   notFound: 'Not found',
@@ -24,7 +26,8 @@ export const Messages: Record<string, string> = {
   adminCreated: 'Admin created successfully',
   adminExists: 'Admin already exists',
   adminDoesntExists: "Admin doesn't exist",
-  otpVerified: 'OTP verified successfully',
+  otpExpired: 'OTP has been expired',
+  emailNotVerified: 'Please verify your email',
   otpSent: 'OTP sent successfully',
-  passwordReset: 'Password reset successfully',
+  otpIncorrect: 'Incorrect OTP',
 };

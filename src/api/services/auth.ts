@@ -49,7 +49,7 @@ const verifyOtp = async (data: { email: string; otp: string }): Promise<IUser> =
 
   const isVerified = await user.verifyOtp(data.otp);
 
-  if (!isVerified) throw new ErrorRes(400, 'Incorrect OTP');
+  if (!isVerified) throw new ErrorRes(400, Messages.otpIncorrect);
   return user;
 };
 

@@ -3,6 +3,7 @@ import bcrypt from 'bcryptjs';
 import Env from '@env';
 import { generateOtp, jwt } from '@utils';
 import { ErrorRes } from '@helpers';
+import { Messages } from '@constants';
 
 export interface IUser extends Document, IUserMethods {
   fullName: string;
@@ -105,7 +106,7 @@ userSchema.methods = {
 
   verifyOtp: async function (givenOtp: string): Promise<boolean> {
     if (new Date().getTime() - new Date(this.otpExpiresAt).getTime() > 1000 * 60 * 10)
-      throw new ErrorRes(410, 'OTP Expired');
+      throw new ErrorRes(410, Messages.otpExpired);
     const isOtpCorrect = this.otp === givenOtp;
     if (isOtpCorrect) this.otp = undefined;
     await this.save();
