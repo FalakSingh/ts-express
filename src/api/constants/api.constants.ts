@@ -11,6 +11,7 @@ export const HttpStatus: HttpStatusTypes = {
 
 export const Messages: MessagesTypes = {
   serverError: 'Internal Server Error',
+  genericError: 'Something went wrong, Please try again',
   badRequest: 'Bad request',
   notFound: 'Not found',
   unauthorized: 'Unauthorized',
@@ -30,4 +31,7 @@ export const Messages: MessagesTypes = {
   emailNotVerified: 'Please verify your email',
   otpSent: 'OTP sent successfully',
   otpIncorrect: 'Incorrect OTP',
+  otpVerified: 'OTP verified successfully',
+  passwordReset: 'Password reset successfully',
+  userDoesntExist: `User with this email doesn't exist`,
 };
