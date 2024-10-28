@@ -42,30 +42,40 @@ const passwordSchema = Joi.string()
     'string.min': 'Password should have a minimum length of {#limit}',
   });
 
+const deviceInfoSchema = {
+  deviceToken: Joi.string()
+    .trim()
+    .required()
+    .messages({
+      ...stringMessages('Device Token'),
+    }),
+  deviceType: Joi.string()
+    .trim()
+    .required()
+    .valid('iOS', 'Android')
+    .messages({
+      ...stringMessages('Device Type'),
+    }),
+  deviceId: Joi.string()
+    .trim()
+    .required()
+    .messages({
+      ...stringMessages('Device ID'),
+    }),
+};
+
 // Basic schemas
 const createUserSchema = Joi.object({
-  firstName: nameSchema('First name'),
-  lastName: nameSchema('Last name'),
+  username: nameSchema('User Name'),
   email: emailSchema,
   password: passwordSchema,
-  image: Joi.string().required().messages({
-    'any.required': 'Image is required',
-  }),
-  emiratesId: Joi.string().required().messages({
-    'any.required': 'Emirates Id is required',
-  }),
-  dob: Joi.string().required().messages({ 'any.required': 'DOB is required' }),
-  countryCode: Joi.string().required().messages({ 'any.required': 'Country code is required' }),
-  phoneNumber: Joi.string().min(7).max(10).required().messages({
-    'string.min': 'Phone Number should have a minimum length of {#limit}',
-    'string.max': 'Phone Number should have a maximum length of {#limit}',
-    'any.required': 'Phone Number is required',
-  }),
+  ...deviceInfoSchema,
 });
 
 const loginUserSchema = Joi.object({
   email: emailSchema,
   password: passwordSchema,
+  ...deviceInfoSchema,
 });
 
 const forgotPasswordSchema = Joi.object({
@@ -73,7 +83,10 @@ const forgotPasswordSchema = Joi.object({
 });
 
 const verifyOtpSchema = forgotPasswordSchema.keys({
-  otp: Joi.string().trim().required().messages({
+  email: emailSchema,
+  type: Joi.string().optional(),
+  otp: Joi.string().trim().length(4).required().messages({
+    'string.length': 'Invalid OTP, must be 4 characters long', // Custom message for length validation
     'any.required': 'OTP is required',
   }),
 });
@@ -86,11 +99,16 @@ const resetPasswordSchema = Joi.object({
   password: passwordSchema,
 });
 
+const logoutSchema = Joi.object({
+  deviceId: deviceInfoSchema.deviceId,
+});
+
 // Validate functions
 const forgotPassword = validateRequest(forgotPasswordSchema);
 const createUser = validateRequest(createUserSchema);
 const userLogin = validateRequest(loginUserSchema);
 const verifyOtp = validateRequest(verifyOtpSchema);
 const resetPassword = validateRequest(resetPasswordSchema);
+const logout = validateRequest(logoutSchema);
 
-export { forgotPassword, createUser, userLogin, verifyOtp, resetPassword };
+export { forgotPassword, createUser, userLogin, verifyOtp, resetPassword, logout };

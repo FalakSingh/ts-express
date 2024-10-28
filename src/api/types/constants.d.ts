@@ -9,10 +9,10 @@ export type HttpStatusTypes = {
 
 export type MessagesTypes = {
   serverError: string;
-  genericError: string;
   badRequest: string;
   notFound: string;
   unauthorized: string;
+  invalidToken: string;
   forbidden: string;
   fetched: string;
   emailExists: string;
@@ -31,5 +31,5 @@ export type MessagesTypes = {
   otpIncorrect: string;
   otpVerified: string;
   passwordReset: string;
-  userDoesntExist: string;
+  logout: string;
 };

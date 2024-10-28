@@ -6,7 +6,6 @@ import logger from '@logger';
 
 export const ErrorHandler = (err: any, req: Request, res: Response, next: NextFunction) => {
   if (!(err instanceof ErrorRes)) {
-    console.log(err);
     err = new ErrorRes(HttpStatus.serverError, Messages.serverError);
   }
   if (Env.NODE_ENV !== 'local') {

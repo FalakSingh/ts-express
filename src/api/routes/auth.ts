@@ -1,6 +1,6 @@
 import { AuthController } from '@controllers';
 import { filehandler, upload } from '@helpers';
-import { catchAsync, defaultMiddleware } from '@middlewares';
+import { catchAsync, defaultMiddleware, validateToken } from '@middlewares';
 import { AuthValidation } from '@validations';
 import { Router } from 'express';
 import { ExpressHandler } from 'types/express';
@@ -11,42 +11,48 @@ const authRoutes = [
   {
     path: '/register',
     method: 'post',
-    handler: AuthController.register,
-    middleware: [upload, filehandler, AuthValidation.createUser],
+    handler: AuthController.user.register,
+    middleware: [AuthValidation.createUser],
+  },
+  {
+    path: '/verify-otp',
+    method: 'post',
+    handler: AuthController.user.verifyOtp,
+    middleware: [AuthValidation.verifyOtp],
   },
   {
     path: '/login',
     method: 'post',
-    handler: AuthController.login,
+    handler: AuthController.user.login,
     middleware: [AuthValidation.userLogin],
   },
   {
     path: '/forgot-password',
     method: 'post',
-    handler: AuthController.forgotPassword,
+    handler: AuthController.user.forgotPassword,
     middleware: [AuthValidation.forgotPassword],
   },
   {
-    path: '/verify-otp',
-    method: 'post',
-    handler: AuthController.verifyOtp,
-    middleware: [AuthValidation.verifyOtp],
+    path: '/reset-password',
+    method: 'patch',
+    handler: AuthController.user.resetPassword,
+    middleware: [AuthValidation.resetPassword],
   },
   {
-    path: '/reset-password',
-    method: 'put',
-    handler: AuthController.resetPassword,
-    middleware: [AuthValidation.resetPassword],
+    path: '/logout',
+    method: 'patch',
+    handler: AuthController.user.logout,
+    middleware: [AuthValidation.logout, validateToken],
   },
   {
     path: '/create-super-admin',
     method: 'get',
-    handler: AuthController.createSuperAdmin,
+    handler: AuthController.admin.createSuperAdmin,
   },
   {
-    path: '/admin-login',
+    path: '/admin/login',
     method: 'post',
-    handler: AuthController.adminLogin,
+    handler: AuthController.admin.adminLogin,
     middleware: [AuthValidation.userLogin],
   },
 ];

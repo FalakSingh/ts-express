@@ -29,7 +29,8 @@
       "@env": ["src/config/env"],
       "@logger":["src/config/logger"],
       "types/*": ["src/api/types/*"],
-      "@constants": ["src/api/constants/api.constants"]
+      "@constants": ["src/api/constants/api.constants"],
+      "@templates": ["src/api/constants/templates/index"]
     }   
   },
   "include": ["./node_modules/@types", "src/**/*.ts", "src/**/*.d.ts"],                             

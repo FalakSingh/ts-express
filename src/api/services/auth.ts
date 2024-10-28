@@ -1,5 +1,4 @@
-import { Admin, IAdmin, IUser, User } from '@models';
-import { UserService } from '.';
+import { Admin, IAdmin, User } from '@models';
 import { HttpStatus, Messages } from '@constants';
 import { ErrorRes } from '@helpers';
 import Env from '@env';
@@ -8,19 +7,9 @@ import { JwtPayload } from 'jsonwebtoken';
 
 // User Auth Services
 
-
-const resetPassword = async (data: { resetToken: string; password: string }): Promise<void> => {
-  const decoded = jwt.verify(data.resetToken, Env.RESET_TOKEN_SECRET);
-  const { id } = decoded as JwtPayload;
-  const user = await User.findById(id);
-  user.password = data.password.trim();
-  await user.save();
-};
-
 // Admin Auth Services
 const createSuperAdmin = async () => {
   if (await Admin.superAdminExists()) throw new ErrorRes(HttpStatus.badRequest, Messages.adminExists);
-
   await Admin.create({
     email: Env.ADMIN_EMAIL,
     password: Env.ADMIN_PASSWORD,

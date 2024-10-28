@@ -11,10 +11,10 @@ export const HttpStatus: HttpStatusTypes = {
 
 export const Messages: MessagesTypes = {
   serverError: 'Internal Server Error',
-  genericError: 'Something went wrong, Please try again',
   badRequest: 'Bad request',
   notFound: 'Not found',
   unauthorized: 'Unauthorized',
+  invalidToken: 'Invalid Token',
   forbidden: 'Forbidden',
   fetched: 'Data fetched successfully',
   emailExists: 'Email already exists',
@@ -32,6 +32,6 @@ export const Messages: MessagesTypes = {
   otpSent: 'OTP sent successfully',
   otpIncorrect: 'Incorrect OTP',
   otpVerified: 'OTP verified successfully',
-  passwordReset: 'Password reset successfully',
-  userDoesntExist: `User with this email doesn't exist`,
+  passwordReset: 'Password Reset successfully',
+  logout: 'User logout successfully',
 };

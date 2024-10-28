@@ -1,3 +1,4 @@
+import Env from '@env';
 import { ErrorRes } from '@helpers';
 import jwt, { JwtPayload } from 'jsonwebtoken';
 

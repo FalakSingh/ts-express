@@ -1,23 +1,34 @@
 import { Model, model, Schema, Document } from 'mongoose';
 import bcrypt from 'bcryptjs';
 import Env from '@env';
-import { generateOtp, jwt } from '@utils';
-import { ErrorRes } from '@helpers';
-import { Messages } from '@constants';
+import { jwt } from '@utils';
+
+export type Device = {
+  deviceType: 'Android' | 'iOS';
+  deviceToken: string;
+  deviceId: string;
+  loginTimeStamp: Date;
+};
 
 export interface IUser extends Document, IUserMethods {
-  fullName: string;
+  firstName: string;
+  middleName?: string;
+  lastName: string;
   email: string;
   isEmailVerified: boolean;
   password: string;
   countryCode: string;
   phoneNumber: string;
   image: string;
-  otp: string;
-  otpExpiresAt: Date;
   isDeleted: boolean;
   isDeactivated: boolean;
   lastLogin: Date;
+  notificationsEnabled: boolean;
+  devices: Array<Device>;
+  location: {
+    type: 'Point';
+    coordinates: [number, number];
+  };
 }
 
 // Put all user instance methods in this interface:
@@ -25,8 +36,7 @@ interface IUserMethods {
   checkPass(password: string): Promise<boolean>;
   getAccessToken(): string;
   getResetToken(): string;
-  getOtp(): Promise<string>;
-  verifyOtp(givenOtp: string): Promise<boolean>;
+  updateLastLogin(): void;
 }
 
 interface IUserModel extends Model<IUser, {}, IUserMethods> {
@@ -36,18 +46,38 @@ interface IUserModel extends Model<IUser, {}, IUserMethods> {
 
 const userSchema = new Schema<IUser, IUserModel, IUserMethods>(
   {
-    fullName: String,
-    email: { type: String, required: true },
+    firstName: String,
+    middleName: String,
+    lastName: String,
+    email: { type: String, required: true, index: true },
     isEmailVerified: { type: Boolean, default: false },
     password: { type: String, select: false },
     countryCode: String,
     phoneNumber: String,
     image: String,
-    otp: { type: String, select: false },
-    otpExpiresAt: Date,
     lastLogin: Date,
     isDeleted: { type: Boolean, default: false },
     isDeactivated: { type: Boolean, default: false },
+    location: {
+      type: {
+        type: String,
+        enum: ['Point'],
+        required: true,
+      },
+      coordinates: {
+        type: [Number],
+        required: true,
+      },
+    },
+    devices: [
+      {
+        _id: false,
+        deviceType: { type: String, enum: ['Android', 'iOS'], required: true },
+        deviceToken: { type: String, required: true },
+        deviceId: { type: String, required: true },
+        loginTimeStamp: { type: Date, default: Date.now },
+      },
+    ],
   },
   {
     timestamps: true,
@@ -89,28 +119,14 @@ userSchema.methods = {
   checkPass: async function (password: string): Promise<boolean> {
     return await bcrypt.compare(password, this.password);
   },
-
   getAccessToken: function (): string {
     return jwt.create({ id: this._id }, Env.ACCESS_TOKEN_SECRET, Env.ACCESS_TOKEN_EXPIRES);
   },
   getResetToken: function (): string {
-    return jwt.create({ id: this._id }, Env.ACCESS_TOKEN_SECRET, Env.ACCESS_TOKEN_EXPIRES);
+    return jwt.create({ id: this._id }, Env.RESET_TOKEN_SECRET, Env.RESET_TOKEN_EXPIRES);
   },
-  getOtp: async function (): Promise<string> {
-    const otp = generateOtp(4);
-    this.otp = otp;
-    this.otpExpiresAt = new Date(Date.now() + 10 * 60 * 1000);
-    await this.save();
-    return otp;
-  },
-
-  verifyOtp: async function (givenOtp: string): Promise<boolean> {
-    if (new Date().getTime() - new Date(this.otpExpiresAt).getTime() > 1000 * 60 * 10)
-      throw new ErrorRes(410, Messages.otpExpired);
-    const isOtpCorrect = this.otp === givenOtp;
-    if (isOtpCorrect) this.otp = undefined;
-    await this.save();
-    return isOtpCorrect;
+  updateLastLogin: function () {
+    this.lastLogin = new Date();
   },
 };
 
