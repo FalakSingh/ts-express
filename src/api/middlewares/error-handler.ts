@@ -5,6 +5,7 @@ import Env from '@env';
 import logger from '@logger';
 
 export const ErrorHandler = (err: any, req: Request, res: Response, next: NextFunction) => {
+  console.log(err);
   if (!(err instanceof ErrorRes)) {
     err = new ErrorRes(HttpStatus.serverError, Messages.serverError);
   }

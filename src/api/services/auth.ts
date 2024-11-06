@@ -2,12 +2,6 @@ import { Admin, IAdmin, User } from '@models';
 import { HttpStatus, Messages } from '@constants';
 import { ErrorRes } from '@helpers';
 import Env from '@env';
-import { jwt } from '@utils';
-import { JwtPayload } from 'jsonwebtoken';
-
-// User Auth Services
-
-// Admin Auth Services
 const createSuperAdmin = async () => {
   if (await Admin.superAdminExists()) throw new ErrorRes(HttpStatus.badRequest, Messages.adminExists);
   await Admin.create({

@@ -11,9 +11,7 @@ export type Device = {
 };
 
 export interface IUser extends Document, IUserMethods {
-  firstName: string;
-  middleName?: string;
-  lastName: string;
+  fullName: string;
   email: string;
   isEmailVerified: boolean;
   password: string;
@@ -25,6 +23,7 @@ export interface IUser extends Document, IUserMethods {
   lastLogin: Date;
   notificationsEnabled: boolean;
   devices: Array<Device>;
+  address: string;
   location: {
     type: 'Point';
     coordinates: [number, number];
@@ -46,9 +45,7 @@ interface IUserModel extends Model<IUser, {}, IUserMethods> {
 
 const userSchema = new Schema<IUser, IUserModel, IUserMethods>(
   {
-    firstName: String,
-    middleName: String,
-    lastName: String,
+    fullName: String,
     email: { type: String, required: true, index: true },
     isEmailVerified: { type: Boolean, default: false },
     password: { type: String, select: false },
@@ -58,10 +55,12 @@ const userSchema = new Schema<IUser, IUserModel, IUserMethods>(
     lastLogin: Date,
     isDeleted: { type: Boolean, default: false },
     isDeactivated: { type: Boolean, default: false },
+    address: String,
     location: {
       type: {
         type: String,
         enum: ['Point'],
+        default: 'Point',
         required: true,
       },
       coordinates: {

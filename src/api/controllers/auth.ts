@@ -1,5 +1,5 @@
 import { HttpStatus, Messages } from '@constants';
-import { ErrorRes, successRes } from '@helpers';
+import { ErrorRes, sanitizeResponse, successRes } from '@helpers';
 import { AdminService, OtpService, UserService } from '@services';
 import { ExpressHandler } from 'types/express';
 import { IAdmin, IUser, User } from '@models';
@@ -14,25 +14,21 @@ const register: ExpressHandler = async (req, res) => {
   const emailExists = await UserService.checkIfEmailIsVerified(email);
   if (emailExists) throw new ErrorRes(HttpStatus.badRequest, Messages.emailExists);
 
-  const userObj = await UserService.findUserByEmail(email);
+  const userObj = await UserService.findUser.byEmail(email);
   if (userObj && !userObj?.isEmailVerified) await UserService.deleteUser.hard(userObj.id);
 
   const otp = await OtpService.setOtpIfDoesntExist(email);
-  const user = await UserService.createUser(payload);
-
-  const userToUpdateDeviceToken = await UserService.findUserById(user.id);
+  let user = await UserService.createUser(payload);
 
   UserService.addUserDevice(user, { deviceToken, deviceId, deviceType });
 
-  await userToUpdateDeviceToken.save();
+  await user.save();
 
-  return successRes(res, HttpStatus.ok, Messages.userRegister, { ...user, otp });
+  return successRes(res, HttpStatus.ok, Messages.userRegister, { ...sanitizeResponse(user.toObject()), otp });
 };
 
 const verifyOtp: ExpressHandler = async (req, res) => {
-  const payload = { ...req.body };
-
-  const { email, otp, type } = payload;
+  const { email, otp, type } = req.body;
 
   const otpObj = await OtpService.findOtpByEmail(email);
   if (!otpObj) throw new ErrorRes(HttpStatus.badRequest, Messages.invalidEmail);
@@ -51,7 +47,7 @@ const verifyOtp: ExpressHandler = async (req, res) => {
 const login: ExpressHandler = async (req, res) => {
   const { email, password, deviceToken, deviceId, deviceType } = req.body;
 
-  let user = await UserService.findUserByEmail(email);
+  let user = await UserService.findUser.byEmail(email);
 
   if (!user) throw new ErrorRes(HttpStatus.badRequest, Messages.invalidEmail);
 
@@ -80,7 +76,7 @@ const login: ExpressHandler = async (req, res) => {
 const forgotPassword: ExpressHandler = async (req, res) => {
   const { email } = req.body;
 
-  const user = await UserService.findUserByEmail(email);
+  const user = await UserService.findUser.byEmail(email);
 
   if (!user) throw new ErrorRes(HttpStatus.badRequest, Messages.invalidEmail);
 
@@ -95,7 +91,7 @@ const resetPassword: ExpressHandler = async (req, res) => {
   const decoded = jwt.verify(resetToken, Env.RESET_TOKEN_SECRET);
 
   if (decoded) {
-    const user = await UserService.findUserById((decoded as JwtPayload).id);
+    const user = await UserService.findUser.byId((decoded as JwtPayload).id);
     user.password = password;
     await user.save();
     return successRes(res, HttpStatus.ok, Messages.passwordReset);

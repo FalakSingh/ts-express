@@ -34,4 +34,8 @@ export const Messages: MessagesTypes = {
   otpVerified: 'OTP verified successfully',
   passwordReset: 'Password Reset successfully',
   logout: 'User logout successfully',
+  update: (type: string) => `${type} updated successfully`,
+  create: (type: string) => `${type} created successfully`,
+  delete: (type: string) => `${type} deleted successfully`,
+  details: (type: string) => `${type} details fetched successfully`,
 };

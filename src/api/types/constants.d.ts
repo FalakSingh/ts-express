@@ -32,4 +32,8 @@ export type MessagesTypes = {
   otpVerified: string;
   passwordReset: string;
   logout: string;
+  update: (type: string) => string;
+  create: (type: string) => string;
+  delete: (type: string) => string;
+  details: (type: string) => string;
 };

@@ -11,7 +11,7 @@ const transporter = nodemailer.createTransport({
   },
 } as nodemailer.TransportOptions);
 
-async function sendMail({ to, subject, text, html }) {
+async function send({ to, subject, text, html }) {
   try {
     const info = await transporter.sendMail({
       from: Env.SMTP.FROM,
@@ -27,4 +27,4 @@ async function sendMail({ to, subject, text, html }) {
   }
 }
 
-export { sendMail };
+export { send };

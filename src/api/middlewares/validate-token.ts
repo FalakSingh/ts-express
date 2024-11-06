@@ -18,7 +18,7 @@ const validateToken = async (req: Request, res: Response, next: NextFunction) =>
 
     const decoded = <JwtPayload>jwt.verify(token, Env.ACCESS_TOKEN_SECRET);
 
-    const user = await UserService.findUserById(decoded.id);
+    const user = await UserService.findUser.byId(decoded.id);
 
     if (!user) throw new ErrorRes(HttpStatus.unauthorized, Messages.unauthorized);
 

@@ -1,13 +1,13 @@
 import { AuthController } from '@controllers';
-import { filehandler, upload } from '@helpers';
-import { catchAsync, defaultMiddleware, validateToken } from '@middlewares';
+import { validateToken } from '@middlewares';
 import { AuthValidation } from '@validations';
 import { Router } from 'express';
-import { ExpressHandler } from 'types/express';
+import { generateRoutes } from './misc';
+import { TRoute } from 'types/routes';
 
-const authRouter = Router();
+const authRouter: Router = Router();
 
-const authRoutes = [
+const authRoutes :Array<TRoute> = [
   {
     path: '/register',
     method: 'post',
@@ -57,8 +57,6 @@ const authRoutes = [
   },
 ];
 
-authRoutes.forEach(({ path, method, handler, middleware = [defaultMiddleware] }) =>
-  (authRouter as any)[method](path, middleware, catchAsync(handler as ExpressHandler))
-);
 
+generateRoutes(authRoutes, authRouter);
 export { authRouter };

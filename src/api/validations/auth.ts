@@ -1,46 +1,6 @@
 import Joi from 'joi';
 import validateRequest from './validate';
-
-// Common messages
-const stringMessages = (field: string) => ({
-  'string.base': `${field} must be a string`,
-  'string.empty': `${field} is required`,
-  'any.required': `${field} is required`,
-});
-
-// Schema for user details (first name, last name)
-const nameSchema = (field: string) =>
-  Joi.string()
-    .trim()
-    .min(3)
-    .max(50)
-    .required()
-    .messages({
-      ...stringMessages(field),
-      'string.min': `${field} should have a minimum length of {#limit}`,
-      'string.max': `${field} should have a maximum length of {#limit}`,
-    });
-
-// Email validation
-const emailSchema = Joi.string()
-  .lowercase()
-  .trim()
-  .email()
-  .required()
-  .messages({
-    ...stringMessages('Email'),
-    'string.email': 'Email must be a valid email',
-  });
-
-// Password validation
-const passwordSchema = Joi.string()
-  .trim()
-  .min(8)
-  .required()
-  .messages({
-    ...stringMessages('Password'),
-    'string.min': 'Password should have a minimum length of {#limit}',
-  });
+import { emailSchema, nameSchema, passwordSchema, stringMessages } from './common';
 
 const deviceInfoSchema = {
   deviceToken: Joi.string()
@@ -66,7 +26,7 @@ const deviceInfoSchema = {
 
 // Basic schemas
 const createUserSchema = Joi.object({
-  username: nameSchema('User Name'),
+  fullName: nameSchema('User Name'),
   email: emailSchema,
   password: passwordSchema,
   ...deviceInfoSchema,
@@ -86,7 +46,7 @@ const verifyOtpSchema = forgotPasswordSchema.keys({
   email: emailSchema,
   type: Joi.string().optional(),
   otp: Joi.string().trim().length(4).required().messages({
-    'string.length': 'Invalid OTP, must be 4 characters long', // Custom message for length validation
+    'string.length': 'Invalid OTP, must be 4 characters long',
     'any.required': 'OTP is required',
   }),
 });

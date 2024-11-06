@@ -1,6 +1,6 @@
 import Env from '@env';
 
-export const register = (username: string, otp: string) => {
+export const register = ({ username, otp }: Record<string, string>) => {
   return `
     <body style="font-family: Arial, sans-serif; margin: 0; padding: 20px; background-color: #f4f4f4;">
     <div style="background-color: #ffffff; border-radius: 8px; padding: 20px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); max-width: 600px; margin: auto;">

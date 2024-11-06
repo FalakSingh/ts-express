@@ -1,31 +1,37 @@
 import { IUser, User } from '@models';
 import { Device } from '../models/user';
+import { IdType } from 'types/express';
 const checkIfEmailIsVerified = async (email: string) => await User.emailExists(email);
 
-const findUserByEmail = async (email: string) => await User.findByEmail(email);
-const findUserById = async (id: string) => await User.findById(id);
+const findUser = {
+  byId: async (id: string) => await User.findById(id).select('+password'),
+  byEmail: async (email: string) => await User.findByEmail(email),
+};
 const setUserEmailVerified = async (email: string) => await User.findOneAndUpdate({ email }, { isEmailVerified: true });
 
-// const checkIfEmail
-
 const deleteUser = {
-  hard: async (userId: string) => await User.findByIdAndDelete(userId),
-  soft: async (userId: string) => await User.findByIdAndUpdate(userId, { isDeleted: true }, { new: true }),
+  hard: async (userId: IdType) => await User.findByIdAndDelete(userId),
+  soft: async (userId: IdType) => await User.findByIdAndUpdate(userId, { isDeleted: true }, { new: true }),
 };
 
-const createUser = async (data: Partial<IUser>) => {
-  let user = (await User.create(data)).toObject();
-  delete user.password;
-  return user;
-};
+const deactivateUser = async (userId: IdType) =>
+  await User.findByIdAndUpdate(userId, { isDeactivated: true }, { new: true });
 
-const fetchDetails = async (id: string) => {
+const createUser = async (data: Partial<IUser>) => await User.create(data);
+
+const fetchDetails = async (id: IdType) => {
   const user = await User.findById(id);
   return user;
 };
 
-const updateUserById = async (id: string, payload: Record<string, any>) =>
-  await User.findByIdAndUpdate(id, { ...payload }, { new: true });
+const updateUserById = async (id: IdType, payload: Record<string, any>) => {
+  if (payload.hasOwnProperty('location')) {
+    payload.location = {
+      coordinates: payload.location,
+    };
+  }
+  return await User.findByIdAndUpdate(id, { $set: payload }, { new: true });
+};
 
 const addUserDevice = (user: IUser, deviceInfo: Omit<Device, 'loginTimeStamp'>) => {
   const existingDeviceIndex = user.devices.findIndex((device) => device.deviceId === deviceInfo.deviceId);
@@ -47,12 +53,12 @@ const removeUserDevice = async (user: IUser, deviceId: string) => {
 export {
   checkIfEmailIsVerified,
   setUserEmailVerified,
-  findUserByEmail,
-  findUserById,
+  findUser,
   createUser,
   fetchDetails,
   deleteUser,
   updateUserById,
   addUserDevice,
   removeUserDevice,
+  deactivateUser,
 };
