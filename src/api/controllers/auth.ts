@@ -31,7 +31,7 @@ const verifyOtp: ExpressHandler = async (req, res) => {
   const { email, otp, type } = req.body;
 
   const otpObj = await OtpService.findOtpByEmail(email);
-  if (!otpObj) throw new ErrorRes(HttpStatus.badRequest, Messages.invalidEmail);
+  if (!otpObj) throw new ErrorRes(HttpStatus.badRequest, `${Messages.invalidEmail} or the ${Messages.otpExpired}`);
   const isOtpCorrect = otpObj.checkOtp(otp);
 
   if (!isOtpCorrect) throw new ErrorRes(HttpStatus.badRequest, Messages.otpIncorrect);
@@ -42,6 +42,12 @@ const verifyOtp: ExpressHandler = async (req, res) => {
   let token = user[type === 'forgot-pass' ? 'getResetToken' : 'getAccessToken']();
 
   return successRes(res, HttpStatus.ok, Messages.otpVerified, { token });
+};
+
+const resendOtp: ExpressHandler = async (req, res) => {
+  const { email } = req.body;
+  const otp = await OtpService.resetOtp(email);
+  return successRes(res, HttpStatus.ok, Messages.otpSent, { otp });
 };
 
 const login: ExpressHandler = async (req, res) => {
@@ -80,7 +86,7 @@ const forgotPassword: ExpressHandler = async (req, res) => {
 
   if (!user) throw new ErrorRes(HttpStatus.badRequest, Messages.invalidEmail);
 
-  const otp = await OtpService.setOtpIfDoesntExist(email, 'forForgotPassword');
+  const otp = await OtpService.setOtpIfDoesntExist(email, 'forgotPass');
 
   return successRes(res, HttpStatus.ok, Messages.otpSent, { otp });
 };
@@ -138,6 +144,7 @@ const adminLogin: ExpressHandler = async (req, res) => {
 const user = {
   register,
   verifyOtp,
+  resendOtp,
   login,
   forgotPassword,
   resetPassword,

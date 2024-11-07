@@ -7,7 +7,7 @@ import { TRoute } from 'types/routes';
 
 const authRouter: Router = Router();
 
-const authRoutes :Array<TRoute> = [
+const authRoutes: Array<TRoute> = [
   {
     path: '/register',
     method: 'post',
@@ -19,6 +19,12 @@ const authRoutes :Array<TRoute> = [
     method: 'post',
     handler: AuthController.user.verifyOtp,
     middleware: [AuthValidation.verifyOtp],
+  },
+  {
+    path: '/resend-otp',
+    method: 'post',
+    handler: AuthController.user.resendOtp,
+    middleware: [AuthValidation.resendOtp],
   },
   {
     path: '/login',
@@ -56,7 +62,6 @@ const authRoutes :Array<TRoute> = [
     middleware: [AuthValidation.userLogin],
   },
 ];
-
 
 generateRoutes(authRoutes, authRouter);
 export { authRouter };

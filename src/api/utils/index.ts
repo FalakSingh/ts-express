@@ -8,5 +8,5 @@ const generateOtp = (otpLength: number): string => {
 
 export * as jwt from './jwt';
 export * as mail from './node-mailer';
-export * as sendEmail from './send-email';
+export { sendEmail } from './send-email';
 export { generateOtp };

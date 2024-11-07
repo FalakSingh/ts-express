@@ -1,4 +1,6 @@
+import { HttpStatus } from '@constants';
 import Env from '@env';
+import { ErrorRes } from '@helpers';
 import nodemailer from 'nodemailer';
 
 const transporter = nodemailer.createTransport({
@@ -12,19 +14,14 @@ const transporter = nodemailer.createTransport({
 } as nodemailer.TransportOptions);
 
 async function send({ to, subject, text, html }) {
-  try {
-    const info = await transporter.sendMail({
-      from: Env.SMTP.FROM,
-      to,
-      subject,
-      text,
-      html,
-    });
-
-    console.log('Message sent: %s', info.messageId);
-  } catch (error) {
-    throw new Error(error.message);
-  }
+  const info = await transporter.sendMail({
+    from: Env.SMTP.FROM,
+    to,
+    subject,
+    text,
+    html,
+  });
+  console.log('Message sent: %s', info.messageId);
 }
 
 export { send };

@@ -41,6 +41,9 @@ const loginUserSchema = Joi.object({
 const forgotPasswordSchema = Joi.object({
   email: emailSchema,
 });
+const resendOtpSchema = Joi.object({
+  email: emailSchema,
+});
 
 const verifyOtpSchema = forgotPasswordSchema.keys({
   email: emailSchema,
@@ -65,10 +68,11 @@ const logoutSchema = Joi.object({
 
 // Validate functions
 const forgotPassword = validateRequest(forgotPasswordSchema);
+const resendOtp = validateRequest(resendOtpSchema);
 const createUser = validateRequest(createUserSchema);
 const userLogin = validateRequest(loginUserSchema);
 const verifyOtp = validateRequest(verifyOtpSchema);
 const resetPassword = validateRequest(resetPasswordSchema);
 const logout = validateRequest(logoutSchema);
 
-export { forgotPassword, createUser, userLogin, verifyOtp, resetPassword, logout };
+export { forgotPassword, resendOtp, createUser, userLogin, verifyOtp, resetPassword, logout };
